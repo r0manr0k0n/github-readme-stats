@@ -1,16 +1,19 @@
-require("dotenv").config();
-const {
-  renderError,
+import * as dotenv from "dotenv";
+import { renderTopLanguages } from "../src/cards/top-languages-card.js";
+import { blacklist } from "../src/common/blacklist.js";
+import {
   clampValue,
-  parseBoolean,
-  parseArray,
   CONSTANTS,
-} = require("../src/common/utils");
-const fetchTopLanguages = require("../src/fetchers/top-languages-fetcher");
-const renderTopLanguages = require("../src/cards/top-languages-card");
-const blacklist = require("../src/common/blacklist");
+  parseArray,
+  parseBoolean,
+  renderError,
+} from "../src/common/utils.js";
+import { fetchTopLanguages } from "../src/fetchers/top-languages-fetcher.js";
+import { isLocaleAvailable } from "../src/translations.js";
 
-module.exports = async (req, res) => {
+dotenv.config();
+
+export default async (req, res) => {
   const {
     username,
     hide,
@@ -24,28 +27,39 @@ module.exports = async (req, res) => {
     cache_seconds,
     layout,
     langs_count,
+    exclude_repo,
+    custom_title,
+    locale,
+    border_radius,
+    border_color,
   } = req.query;
-  let topLangs;
-
   res.setHeader("Content-Type", "image/svg+xml");
 
   if (blacklist.includes(username)) {
     return res.send(renderError("Something went wrong"));
   }
 
+  if (locale && !isLocaleAvailable(locale)) {
+    return res.send(renderError("Something went wrong", "Locale not found"));
+  }
+
   try {
-    topLangs = await fetchTopLanguages(username, langs_count);
+    const topLangs = await fetchTopLanguages(
+      username,
+      parseArray(exclude_repo),
+    );
 
     const cacheSeconds = clampValue(
-      parseInt(cache_seconds || CONSTANTS.TWO_HOURS, 10),
-      CONSTANTS.TWO_HOURS,
-      CONSTANTS.ONE_DAY
+      parseInt(cache_seconds || CONSTANTS.FOUR_HOURS, 10),
+      CONSTANTS.FOUR_HOURS,
+      CONSTANTS.ONE_DAY,
     );
 
     res.setHeader("Cache-Control", `public, max-age=${cacheSeconds}`);
 
     return res.send(
       renderTopLanguages(topLangs, {
+        custom_title,
         hide_title: parseBoolean(hide_title),
         hide_border: parseBoolean(hide_border),
         card_width: parseInt(card_width, 10),
@@ -55,7 +69,11 @@ module.exports = async (req, res) => {
         bg_color,
         theme,
         layout,
-      })
+        langs_count,
+        border_radius,
+        border_color,
+        locale: locale ? locale.toLowerCase() : null,
+      }),
     );
   } catch (err) {
     return res.send(renderError(err.message, err.secondaryMessage));

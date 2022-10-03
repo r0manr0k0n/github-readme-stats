@@ -1,5 +1,5 @@
-require("@testing-library/jest-dom");
-const calculateRank = require("../src/calculateRank");
+import "@testing-library/jest-dom";
+import { calculateRank } from "../src/calculateRank.js";
 
 describe("Test calculateRank", () => {
   it("should calculate rank correctly", () => {
@@ -12,7 +12,7 @@ describe("Test calculateRank", () => {
         stargazers: 400,
         prs: 300,
         issues: 200,
-      })
+      }),
     ).toStrictEqual({ level: "A+", score: 49.16605417270399 });
   });
 });

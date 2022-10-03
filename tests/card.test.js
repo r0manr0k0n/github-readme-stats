@@ -1,9 +1,9 @@
-require("@testing-library/jest-dom");
-const cssToObject = require("css-to-object");
-const Card = require("../src/common/Card");
-const icons = require("../src/common/icons");
-const { getCardColors } = require("../src/common/utils");
-const { queryByTestId } = require("@testing-library/dom");
+import { queryByTestId } from "@testing-library/dom";
+import "@testing-library/jest-dom";
+import { cssToObject } from "@uppercod/css-to-object";
+import { Card } from "../src/common/Card.js";
+import { icons } from "../src/common/icons.js";
+import { getCardColors } from "../src/common/utils.js";
 
 describe("Card", () => {
   it("should hide border", () => {
@@ -13,7 +13,7 @@ describe("Card", () => {
     document.body.innerHTML = card.render(``);
     expect(queryByTestId(document.body, "card-bg")).toHaveAttribute(
       "stroke-opacity",
-      "0"
+      "0",
     );
   });
 
@@ -24,7 +24,19 @@ describe("Card", () => {
     document.body.innerHTML = card.render(``);
     expect(queryByTestId(document.body, "card-bg")).toHaveAttribute(
       "stroke-opacity",
-      "1"
+      "1",
+    );
+  });
+
+  it("should have a custom title", () => {
+    const card = new Card({
+      customTitle: "custom title",
+      defaultTitle: "default title",
+    });
+
+    document.body.innerHTML = card.render(``);
+    expect(queryByTestId(document.body, "card-title")).toHaveTextContent(
+      "custom title",
     );
   });
 
@@ -63,11 +75,11 @@ describe("Card", () => {
     document.body.innerHTML = card.render(``);
     expect(document.getElementsByTagName("svg")[0]).toHaveAttribute(
       "height",
-      "200"
+      "200",
     );
     expect(document.getElementsByTagName("svg")[0]).toHaveAttribute(
       "height",
-      "200"
+      "200",
     );
   });
 
@@ -78,7 +90,7 @@ describe("Card", () => {
     document.body.innerHTML = card.render(``);
     expect(document.getElementsByTagName("svg")[0]).toHaveAttribute(
       "height",
-      "170"
+      "170",
     );
   });
 
@@ -87,7 +99,7 @@ describe("Card", () => {
     document.body.innerHTML = card.render(``);
     expect(queryByTestId(document.body, "main-card-body")).toHaveAttribute(
       "transform",
-      "translate(0, 55)"
+      "translate(0, 55)",
     );
   });
 
@@ -98,7 +110,7 @@ describe("Card", () => {
     document.body.innerHTML = card.render(``);
     expect(queryByTestId(document.body, "main-card-body")).toHaveAttribute(
       "transform",
-      "translate(0, 25)"
+      "translate(0, 25)",
     );
   });
 
@@ -125,12 +137,12 @@ describe("Card", () => {
 
     const styleTag = document.querySelector("style");
     const stylesObject = cssToObject(styleTag.innerHTML);
-    const headerClassStyles = stylesObject[".header"];
+    const headerClassStyles = stylesObject[":host"][".header "];
 
-    expect(headerClassStyles.fill).toBe("#f00");
+    expect(headerClassStyles["fill"].trim()).toBe("#f00");
     expect(queryByTestId(document.body, "card-bg")).toHaveAttribute(
       "fill",
-      "#fff"
+      "#fff",
     );
   });
   it("should render gradient backgrounds", () => {
@@ -154,20 +166,20 @@ describe("Card", () => {
     document.body.innerHTML = card.render(``);
     expect(queryByTestId(document.body, "card-bg")).toHaveAttribute(
       "fill",
-      "url(#gradient)"
+      "url(#gradient)",
     );
-    expect(document.querySelector("defs linearGradient")).toHaveAttribute(
+    expect(document.querySelector("defs #gradient")).toHaveAttribute(
       "gradientTransform",
-      "rotate(90)"
+      "rotate(90)",
     );
     expect(
-      document.querySelector("defs linearGradient stop:nth-child(1)")
+      document.querySelector("defs #gradient stop:nth-child(1)"),
     ).toHaveAttribute("stop-color", "#fff");
     expect(
-      document.querySelector("defs linearGradient stop:nth-child(2)")
+      document.querySelector("defs #gradient stop:nth-child(2)"),
     ).toHaveAttribute("stop-color", "#000");
     expect(
-      document.querySelector("defs linearGradient stop:nth-child(3)")
+      document.querySelector("defs #gradient stop:nth-child(3)"),
     ).toHaveAttribute("stop-color", "#f00");
   });
 });
